@@ -11,15 +11,15 @@
 |
 */
 
+// Route::get('job', function(){
+// 	dispatch(new App\Jobs\SendEmail);
+// 	return "Listo...";
+// });
 
-// App\User::create([
 
-// 	'name' => 'Otro Administrador',
-// 	'email' => 'admin2@email.com',
-// 	'password' => bcrypt('123123'),
-// 	'role_id' => '1'
-
-// ]);
+// DB::listen(function($query){
+// 	echo "<pre>{$query->sql}</pre>";
+// });
 
 Route::get('roles', function(){
 	return \App\Role::with('user')->get();

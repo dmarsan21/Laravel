@@ -5,6 +5,13 @@
 
 	<link rel="stylesheet" href="/css/app.css">
 
+	<!-- script para usar socket.io -->
+	<script>
+		window.Laravel = {
+			csrfToken: "{{ csrf_token() }}"
+		}
+	</script>
+
 	<title>David Martinez</title>
 </head>
 <body>

@@ -14,13 +14,25 @@ use Carbon\Carbon;
 
 use App\Http\Requests;
 
+use App\Repositories\Messages;
+
+use App\Repositories\CacheMessages;
+
+use App\Repositories\MessagesInterface;
+
 use App\Events\MessageWasReceived;
+
+use Illuminate\Support\Facades\Cache;
 
 class MessagesController extends Controller
 {
     
-    function __construct()
+    protected $messages;
+
+    //agregue public
+    public function __construct(MessagesInterface $messages)
     {
+        $this->messages = $messages;
         $this->middleware('auth', ['except' => ['create', 'store']]);
     }
 
@@ -34,7 +46,8 @@ class MessagesController extends Controller
         
         // $messages = DB::table('messages')->get(); aca se usa Query Builder
 
-        $messages = Message::with(['user', 'note', 'tags'])->get(); //Aca se usa eloquent
+        $messages = $this->messages->getPaginated();
+
         
         return view('messages.index', compact('messages'));
     }
@@ -59,14 +72,7 @@ class MessagesController extends Controller
     {
         
 
-        $message = Message::create($request->all());
-
-        // if (auth()->check()) {
-        //     auth()->user()->messages()->save($message);
-        // }
-
-        $message->user_id = auth()->id();
-        $message->save();
+        $message = $this->messages->store($request);
 
         event(new MessageWasReceived($message));
 
@@ -86,8 +92,10 @@ class MessagesController extends Controller
     {
         
         // $message = DB::table('messages')->where('id', $id)->first();
-        $message = Message::findOrFail($id);
 
+        $message = $this->messages->findById($id);
+
+        
         return view('messages.show', compact('message'));
     }
 
@@ -100,7 +108,7 @@ class MessagesController extends Controller
     public function edit($id)
     {
         // $message = DB::table('messages')->where('id', $id)->first();
-        $message = Message::findOrFail($id);
+        $message = $this->messages->findById($id);
 
         return view('messages.edit', compact('message'));
     }
@@ -123,9 +131,10 @@ class MessagesController extends Controller
         // ]);
 
         //Actualizar con eloquent
-        Message::findOrFail($id)->update($request->all());
         
+        $message = $this->messages->update($request, $id);
 
+        
         //Redireccionamos
         return redirect()->route('mensajes.index');
     }
@@ -141,7 +150,7 @@ class MessagesController extends Controller
         //Eliminar el mensaje Query builder
         // DB::table('messages')->where('id', $id)->delete();
 
-        Message::findOrFail($id)->delete();
+       $this->messages->destroy($id);
 
         //Redireccionar
         return redirect()->route('mensajes.index');

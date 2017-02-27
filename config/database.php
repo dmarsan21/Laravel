@@ -107,6 +107,9 @@ return [
 
     'redis' => [
 
+        // esta linea yo la puse
+        'client' => 'predis',
+
         'cluster' => false,
 
         'default' => [
